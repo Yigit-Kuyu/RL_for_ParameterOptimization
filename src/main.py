@@ -1,0 +1,48 @@
+from rl.environment import MRIEnv
+from rl.q_learning import q_learn
+from utils.image_processing import rss_ifft_torch
+from utils.xml_parsing import parse_header
+import h5py
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
+
+def main():
+    root_dir = Path("/home/yck/Desktop/Datasets/yck_knee_for_Debugging")
+    file_list = sorted([f for f in root_dir.glob("*.h5")])
+
+    results = []
+    all_rewards = []
+
+    for fpath in file_list:
+        with h5py.File(fpath, 'r') as hf:
+            ksp = torch.from_numpy(hf['kspace'][()])
+            tr0, te0, T1c, T2c = parse_header(hf['ismrmrd_header'][()])
+
+            ref_img = rss_ifft_torch(ksp).cpu()
+            env = MRIEnv(ref_img, tr0, te0, T1c, T2c)
+            Q, rews = q_learn(env, episodes=200)
+            all_rewards.append(rews)
+
+            s = env.reset()
+            for _ in range(200):
+                a = int(np.argmax(Q.get(s, np.zeros(len(env.actions)))))
+                s, _, done = env.step(a)
+                if done:
+                    break
+            results.append(((tr0, te0), s))
+
+    plt.figure(figsize=(5, 3))
+    plt.plot(all_rewards[0])
+    plt.xlabel("Episode")
+    plt.ylabel("Total reward (SSIM)")
+    plt.title("Reward curve – first file")
+    plt.tight_layout()
+    plt.show()
+
+    for i, (real_p, found_p) in enumerate(results, 1):
+        print(f"File {i}: Real {real_p} vs Found {found_p}")
+
+if __name__ == "__main__":
+    main()
