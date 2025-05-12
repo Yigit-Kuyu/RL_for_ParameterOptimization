@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 def main():
-    root_dir = Path("/home/yck/Desktop/Datasets/yck_knee_for_Debugging")
+    root_dir = Path() # Path to FastMRI Knee dataset
     file_list = sorted([f for f in root_dir.glob("*.h5")])
 
     results = []
