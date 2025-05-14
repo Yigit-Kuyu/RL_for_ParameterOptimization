@@ -8,7 +8,7 @@ def q_learn(env, episodes=200, alpha=0.1, gamma=0.95,
     for ep in range(episodes):
         s = env.reset()
         total_r = 0
-        for _ in range(2000):
+        for _ in range(1500): # 
             if s not in Q: 
                 Q[s] = np.zeros(len(env.actions))
             if np.random.rand() < eps:

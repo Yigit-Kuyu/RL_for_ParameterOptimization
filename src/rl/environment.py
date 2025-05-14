@@ -23,7 +23,7 @@ class MRIEnv:
         self.te_max = te0 * 1.5
         Rf0 = 1 - np.exp(-tr0 / T1c)
         Ef0 = np.exp(-te0 / T2c)
-        self.M0 = self.ref / (Rf0 * Ef0)
+        self.M0 = self.ref / (Rf0 * Ef0) 
 
     def _reward(self, sim_img: torch.Tensor) -> float:
         """Compute SSIM(ref, sim)"""
@@ -36,6 +36,7 @@ class MRIEnv:
         return self.state
 
     def _simulate(self, tr, te) -> torch.Tensor:
+        # https://www.cis.rit.edu/htbooks/mri/chap-4/chap-4-h5.htm
         Rf = 1 - np.exp(-tr / self.T1c)
         Ef = np.exp(-te / self.T2c)
         sim_img = self.M0 * Rf * Ef
